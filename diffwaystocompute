@@ -1,0 +1,31 @@
+class Solution {
+    public List<Integer> diffWaysToCompute(String expression) {
+        return helper(expression);
+    }
+
+    private List<Integer> helper(String expr) {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < expr.length(); i++) {
+            char charAt = expr.charAt(i);
+            if (charAt == '+' || charAt == '-' || charAt == '*') {
+                List<Integer> left = helper(expr.substring(0, i));
+                List<Integer> right = helper(expr.substring(i + 1));
+                for (int l : left) {
+                    for (int r : right) {
+                        if (charAt == '+') {
+                            result.add(l + r);
+                        } else if (charAt == '-') {
+                            result.add(l - r);
+                        } else {
+                            result.add(l * r);
+                        }
+                    }
+                }
+            }
+        }
+        if (result.isEmpty()) {
+            result.add(Integer.parseInt(expr));
+        }
+        return result;
+    }
+}
