@@ -13,7 +13,6 @@ class CustomStack {
             stk[i++] = x;
         }
     }
-
     public int pop() {
         if (i <= 0) {
             return -1;
@@ -32,7 +31,6 @@ class CustomStack {
         }
     }
 }
-
 /**
  * Your CustomStack object will be instantiated and called as such:
  * CustomStack obj = new CustomStack(maxSize);
