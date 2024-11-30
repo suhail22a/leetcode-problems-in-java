@@ -1,42 +1,46 @@
-import java.util.*;
-
 class Solution {
-    public List<int[]> validArrangement(int[][] pairs) {
-        // Graph adjacency list and degree tracker
-        Map<Integer, LinkedList<Integer>> graph = new HashMap<>();
-        Map<Integer, Integer> inOutDeg = new HashMap<>();
-
-        // Build graph and track in/out degrees
+    public int[][] validArrangement(int[][] pairs) {
+        Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
+        Map<Integer, Integer> inOutDegree = new HashMap<>();
+        
+        // Build graph and count in/out degrees
         for (int[] pair : pairs) {
-            int start = pair[0], end = pair[1];
-            graph.computeIfAbsent(start, k -> new LinkedList<>()).add(end);
-            inOutDeg.put(start, inOutDeg.getOrDefault(start, 0) + 1); // Out-degree
-            inOutDeg.put(end, inOutDeg.getOrDefault(end, 0) - 1);    // In-degree
+            adjacencyList.computeIfAbsent(pair[0], k -> new ArrayList<>()).add(pair[1]);
+            inOutDegree.merge(pair[0], 1, Integer::sum);  // out-degree
+            inOutDegree.merge(pair[1], -1, Integer::sum);  // in-degree
         }
-
-        // Find the start node
+        
+        // Find starting node
         int startNode = pairs[0][0];
-        for (int node : inOutDeg.keySet()) {
-            if (inOutDeg.get(node) == 1) {
-                startNode = node;
+        for (Map.Entry<Integer, Integer> entry : inOutDegree.entrySet()) {
+            if (entry.getValue() == 1) {
+                startNode = entry.getKey();
                 break;
             }
         }
-
-        // Hierholzer's algorithm
-        LinkedList<int[]> path = new LinkedList<>();
-        dfs(startNode, graph, path);
-
-        // Convert LinkedList to List and return
-        return path;
-    }
-
-    private void dfs(int curr, Map<Integer, LinkedList<Integer>> graph, LinkedList<int[]> path) {
-        LinkedList<Integer> neighbors = graph.getOrDefault(curr, new LinkedList<>());
-        while (!neighbors.isEmpty()) {
-            int next = neighbors.poll();
-            dfs(next, graph, path);
-            path.addFirst(new int[]{curr, next}); // Add to path in reverse order
+        
+        List<Integer> path = new ArrayList<>();
+        Deque<Integer> nodeStack = new ArrayDeque<>();
+        nodeStack.push(startNode);
+        
+        while (!nodeStack.isEmpty()) {
+            List<Integer> neighbors = adjacencyList.getOrDefault(nodeStack.peek(), new ArrayList<>());
+            if (neighbors.isEmpty()) {
+                path.add(nodeStack.pop());
+            } else {
+                int nextNode = neighbors.get(neighbors.size() - 1);
+                nodeStack.push(nextNode);
+                neighbors.remove(neighbors.size() - 1);
+            }
         }
+        
+        int pathSize = path.size();
+        int[][] arrangement = new int[pathSize - 1][2];
+        
+        for (int i = pathSize - 1; i > 0; --i) {
+            arrangement[pathSize - 1 - i] = new int[]{path.get(i), path.get(i-1)};
+        }
+        
+        return arrangement;
     }
 }
